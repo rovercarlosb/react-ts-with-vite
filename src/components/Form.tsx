@@ -1,32 +1,37 @@
-import { SetStateAction, useState } from 'react';
+import useNewSubForm from '../hooks/useNewSubForm';
 import { Sub } from '../types';
 
-interface FormState {
-  inputValues: Sub;
-}
-
 interface FormProps {
-  onNewSub: React.Dispatch<React.SetStateAction<Sub[]>>;
+  onNewSub: (newSub: Sub) => void;
 }
 
 const Form = ({ onNewSub }: FormProps) => {
-  const [inputValues, setInputValues] = useState<FormState['inputValues']>({
-    nick: '',
-    subMonths: 0,
-    avatar: '',
-    description: '',
-  });
+  // const [inputValues, setInputValues] =
+  //   useState<FormState['inputValues']>(INITIAL_STATE);
+
+  const [inputValues, dispatch] = useNewSubForm();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onNewSub((subs) => [...subs, inputValues]);
+    onNewSub(inputValues);
+    handleClear();
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
-    setInputValues({
-      ...inputValues,
-      [e.target.name]: e.target.value,
+    dispatch({
+      type: 'change_value',
+      payload: {
+        inputName: e.target.name,
+        inputValue: e.target.value,
+      },
+    });
+  };
+
+  const handleClear = () => {
+    dispatch({
+      type: 'clear',
     });
   };
 
@@ -62,6 +67,9 @@ const Form = ({ onNewSub }: FormProps) => {
         />
 
         <button type="submit">Save New Sub</button>
+        <button type="button" onClick={handleClear}>
+          Clear new Sub
+        </button>
       </form>
     </div>
   );
